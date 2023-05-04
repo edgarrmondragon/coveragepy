@@ -21,6 +21,7 @@ from coverage.debug import short_stack
 from coverage.disposition import FileDisposition
 from coverage.exceptions import ConfigError
 from coverage.misc import human_sorted_items, isolate_module
+from coverage.pep669_tracer import Pep669Tracer
 from coverage.plugin import CoveragePlugin
 from coverage.pytracer import PyTracer
 from coverage.types import (
@@ -144,8 +145,12 @@ class Collector:
         if HAS_CTRACER and not timid:
             use_ctracer = True
 
-        #if HAS_CTRACER and self._trace_class is CTracer:
-        if use_ctracer:
+        if env.PYBEHAVIOR.pep669 and self.should_start_context is None:
+            self._trace_class = Pep669Tracer
+            self.file_disposition_class = FileDisposition
+            self.supports_plugins = False
+            self.packed_arcs = False
+        elif use_ctracer:
             self._trace_class = CTracer
             self.file_disposition_class = CFileDisposition
             self.supports_plugins = True

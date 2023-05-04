@@ -71,6 +71,14 @@ class PyTracer(TTracer):
         self.context: Optional[str] = None
         self.started_context = False
 
+        # The data_stack parallels the Python call stack. Each entry is
+        # information about an active frame, a four-element tuple:
+        #   [0] The TTraceData for this frame's file. Could be None if we
+        #           aren't tracing this frame.
+        #   [1] The current file name for the frame. None if we aren't tracing
+        #           this frame.
+        #   [2] The last line number executed in this frame.
+        #   [3] Boolean: did this frame start a new context?
         self.data_stack: List[Tuple[Optional[TTraceFileData], Optional[str], TLineNo, bool]] = []
         self.thread: Optional[threading.Thread] = None
         self.stopped = False

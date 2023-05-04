@@ -173,6 +173,8 @@ class CoverageTest(
         # Coverage.py wants to deal with things as modules with file names.
         modname = self.get_module_name()
 
+        #import dis,textwrap; dis.dis(textwrap.dedent(text))
+
         self.make_file(modname + ".py", text)
 
         if arcs is None and arcz is not None:
