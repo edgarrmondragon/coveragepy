@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import collections
 import contextlib
+import dis
 import os
 import os.path
 import re
@@ -94,13 +95,26 @@ def make_file(
         data = text.encode("utf-8")
 
     # Make sure the directories are available.
-    dirs, _ = os.path.split(filename)
-    if dirs and not os.path.exists(dirs):
-        os.makedirs(dirs)
+    dirs, basename = os.path.split(filename)
+    if dirs:
+        os.makedirs(dirs, exist_ok=True)
 
     # Create the file.
     with open(filename, 'wb') as f:
         f.write(data)
+
+    # $set_env.py: COVERAGE_DIS - Disassemble test code to /tmp/dis
+    show_dis = bool(int(os.environ.get("COVERAGE_DIS", 0)))
+    if basename.endswith(".py") and show_dis:   # pragma: debugging
+        os.makedirs("/tmp/dis", exist_ok=True)
+        with open(f"/tmp/dis/{basename}.dis", "w") as fdis:
+            print(f"# {os.path.abspath(filename)}", file=fdis)
+            try:
+                dis.dis(textwrap.dedent(text), file=fdis)
+            except Exception as exc:
+                # Some tests make .py files that aren't Python, so dis will
+                # fail, which is expected.
+                print(f"#! {exc!r}")
 
     # For debugging, enable this to show the contents of files created.
     if 0:  # pragma: debugging
