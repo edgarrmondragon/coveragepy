@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   tests:
-    name: "${{ matrix.python-version }}"
+    name: "${{ matrix.python-version }}${{ matrix.disable-gil && ' (nogil)' || '' }}"
     # Choose a recent Ubuntu that deadsnakes still builds all the versions for.
     # For example, deadsnakes doesn't provide 3.10 nightly for 22.04 (jammy)
     # because jammy ships 3.10, and deadsnakes doesn't want to clobber it.
@@ -49,10 +49,15 @@ jobs:
           # https://launchpad.net/~deadsnakes/+archive/ubuntu/nightly/+packages
           - "3.11-dev"
           - "3.12-dev"
+          - "3.13-dev"
           # https://github.com/actions/setup-python#available-versions-of-pypy
           - "pypy-3.8-nightly"
           - "pypy-3.9-nightly"
           - "pypy-3.10-nightly"
+        disable-gil: [false]
+        include:
+          - python-version: "3.13-dev"
+            disable-gil: true
       fail-fast: false
 
     steps:
@@ -64,6 +69,7 @@ jobs:
         if: "!startsWith(matrix.python-version, 'pypy-')"
         with:
           python-version: "${{ matrix.python-version }}"
+          nogil: ${{ matrix.disable-gil }}
 
       - name: "Install ${{ matrix.python-version }} with setup-python"
         uses: "actions/setup-python@v4"
