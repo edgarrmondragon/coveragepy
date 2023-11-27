@@ -49,10 +49,14 @@ jobs:
           # https://launchpad.net/~deadsnakes/+archive/ubuntu/nightly/+packages
           - "3.11-dev"
           - "3.12-dev"
+          - "3.13-dev"
           # https://github.com/actions/setup-python#available-versions-of-pypy
           - "pypy-3.8-nightly"
           - "pypy-3.9-nightly"
           - "pypy-3.10-nightly"
+        include:
+          - python-version: "3.13-dev"
+            disable-gil: true
       fail-fast: false
 
     steps:
@@ -64,6 +68,7 @@ jobs:
         if: "!startsWith(matrix.python-version, 'pypy-')"
         with:
           python-version: "${{ matrix.python-version }}"
+          nogil: ${{ matrix.disable-gil || 'false' }}
 
       - name: "Install ${{ matrix.python-version }} with setup-python"
         uses: "actions/setup-python@v4"
